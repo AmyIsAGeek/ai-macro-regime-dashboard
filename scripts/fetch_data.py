@@ -9,8 +9,12 @@ import pandas as pd
 import requests
 
 
-def get_with_retries(url: str, attempts: int = 5, sleep_seconds: int = 5) -> str:
-    """Fetch URL text with retries. Helps with temporary DNS/network hiccups."""
+def get_with_retries(url: str, attempts: int = 2, sleep_seconds: int = 2) -> str:
+    """Fetch URL text with short retries.
+
+    This intentionally fails fast so GitHub Actions does not hang for many minutes
+    if FRED/Yahoo is temporarily slow or unreachable.
+    """
     last_error = None
 
     headers = {
@@ -19,7 +23,7 @@ def get_with_retries(url: str, attempts: int = 5, sleep_seconds: int = 5) -> str
 
     for attempt in range(1, attempts + 1):
         try:
-            r = requests.get(url, timeout=75, headers=headers)
+            r = requests.get(url, timeout=20, headers=headers)
             r.raise_for_status()
             return r.text
         except Exception as e:
@@ -64,6 +68,7 @@ def fetch_stooq_daily(symbol: str) -> pd.DataFrame:
         raise ValueError(f"Stooq returned non-CSV content for {symbol}: {text[:200]}")
 
     df = pd.read_csv(StringIO(text))
+
     if df.empty or "Date" not in df.columns:
         raise ValueError(f"No Stooq data returned for {symbol}")
 
@@ -73,6 +78,7 @@ def fetch_stooq_daily(symbol: str) -> pd.DataFrame:
 
 
 def _unix_timestamp(date_str: str) -> int:
+    """Convert YYYY-MM-DD to a UTC Unix timestamp."""
     dt = pd.to_datetime(date_str).to_pydatetime()
     return int(datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc).timestamp())
 
@@ -80,11 +86,11 @@ def _unix_timestamp(date_str: str) -> int:
 def fetch_yahoo_chart(
     symbol: str,
     start_date: str = "2025-01-01",
-    end_date: str = "2030-01-01"
+    end_date: str = "2030-01-01",
 ) -> pd.DataFrame:
     """Fetch daily adjusted close data from Yahoo's public chart endpoint.
 
-    This avoids the fragile CSV/crumb download path.
+    This avoids Yahoo's fragile CSV/crumb download path.
     """
     period1 = _unix_timestamp(start_date)
     period2 = _unix_timestamp(end_date)
@@ -101,9 +107,9 @@ def fetch_yahoo_chart(
 
     last_error = None
 
-    for attempt in range(1, 6):
+    for attempt in range(1, 3):
         try:
-            r = requests.get(url, timeout=75, headers=headers)
+            r = requests.get(url, timeout=20, headers=headers)
             r.raise_for_status()
             payload = r.json()
 
@@ -122,23 +128,35 @@ def fetch_yahoo_chart(
             if not timestamps or not adjclose:
                 raise ValueError(f"Missing timestamp/adjclose data for {symbol}")
 
-            df = pd.DataFrame({
-                "Date": pd.to_datetime(timestamps, unit="s", utc=True).tz_convert(None).normalize(),
-                "Value": adjclose,
-            })
+            df = pd.DataFrame(
+                {
+                    "Date": pd.to_datetime(
+                        timestamps,
+                        unit="s",
+                        utc=True,
+                    ).tz_convert(None).normalize(),
+                    "Value": adjclose,
+                }
+            )
 
             df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
             return df.dropna().sort_values("Date")
 
         except Exception as e:
             last_error = e
-            if attempt < 5:
-                time.sleep(5)
+            if attempt < 2:
+                time.sleep(2)
 
-    raise RuntimeError(f"Failed Yahoo chart fetch after 5 attempts for {symbol}: {last_error}")
+    raise RuntimeError(
+        f"Failed Yahoo chart fetch after 2 attempts for {symbol}: {last_error}"
+    )
 
 
-def latest_on_or_before(df: pd.DataFrame, target_date: str) -> Tuple[Optional[str], Optional[float]]:
+def latest_on_or_before(
+    df: pd.DataFrame,
+    target_date: str,
+) -> Tuple[Optional[str], Optional[float]]:
+    """Return latest available observation on or before target_date."""
     target = pd.to_datetime(target_date)
     tmp = df[df["Date"] <= target].dropna().sort_values("Date")
 
@@ -149,7 +167,11 @@ def latest_on_or_before(df: pd.DataFrame, target_date: str) -> Tuple[Optional[st
     return row["Date"].strftime("%Y-%m-%d"), float(row["Value"])
 
 
-def prior_month_value(df: pd.DataFrame, target_date: str) -> Tuple[Optional[str], Optional[float]]:
+def prior_month_value(
+    df: pd.DataFrame,
+    target_date: str,
+) -> Tuple[Optional[str], Optional[float]]:
+    """Return latest available observation on or before one month before target_date."""
     target = pd.to_datetime(target_date)
     prior_cutoff = target - pd.DateOffset(months=1)
     tmp = df[df["Date"] <= prior_cutoff].dropna().sort_values("Date")
