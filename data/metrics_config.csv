@@ -1,0 +1,31 @@
+MetricID,Cluster,Metric,SourceType,SourceID,Unit,Transform,PublicSourceURL,UpdateFrequency,Weight_Citrini,Weight_Green,Weight_Alden,AutoStatus,Interpretation
+M01,Market pricing,30Y Treasury yield,FRED,DGS30,%,level,https://fred.stlouisfed.org/series/DGS30,Daily,0,3,2,Yes,Green if high/stabilizing then falling; Alden if rising disorderly.
+M02,Market pricing,30Y TIPS real yield,FRED,DFII30,%,level,https://fred.stlouisfed.org/series/DFII30,Daily,0,5,2,Yes,Green if high real yield remains attractive; Alden if gold rises despite high real yields.
+M03,Inflation expectations,10Y breakeven inflation,FRED,T10YIE,%,level,https://fred.stlouisfed.org/series/T10YIE,Daily,1,4,4,Yes,Green if contained; Alden if rising meaningfully.
+M04,Inflation expectations,30Y breakeven inflation,DERIVED,DGS30-DFII30,%,derived,https://fred.stlouisfed.org/series/DGS30,Daily,1,3,4,Yes,Green if contained; Alden if rising.
+M05,Market pricing,10Y term premium,FRED,THREEFYTP10,%,level,https://fred.stlouisfed.org/series/THREEFYTP10,Daily/weekly,0,4,5,Yes,Green if compressing; Alden if rising.
+M06,Market pricing,TLT price,STOOQ,tlt.us,USD,price,https://stooq.com/q/d/l/?s=tlt.us&i=d,Daily,2,4,0,Yes,Green/Citrini if long bonds rally.
+M07,Market pricing,Gold proxy price GLD,STOOQ,gld.us,USD,price,https://stooq.com/q/d/l/?s=gld.us&i=d,Daily,2,0,5,Yes,"Alden if gold rises, especially despite high real yields/dollar."
+M08,Market pricing,Dollar index proxy UUP,STOOQ,uup.us,USD,price,https://stooq.com/q/d/l/?s=uup.us&i=d,Daily,0,0,3,Yes,Alden if gold rises despite dollar strength; otherwise helps classify other regimes.
+M09,Treasury demand,30Y auction tail,MANUAL,,bps,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,4,5,Manual,Green if stop-through/strong demand; Alden if repeated tails.
+M10,Treasury demand,30Y bid-to-cover,MANUAL,,ratio,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,4,5,Manual,Green if high bid-to-cover; Alden if weak.
+M11,Treasury demand,30Y indirect bidder share,MANUAL,,%,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,4,4,Manual,Green if indirect demand strong; Alden if falling.
+M12,Treasury demand,30Y primary dealer takedown,MANUAL,,%,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,3,4,Manual,Alden if dealers must absorb too much supply.
+M13,Labor/income stress,U-3 unemployment rate,FRED,UNRATE,%,level,https://fred.stlouisfed.org/series/UNRATE,Monthly,5,2,0,Yes,Citrini if rising quickly.
+M14,Labor/income stress,U-6 underemployment rate,FRED,U6RATE,%,level,https://fred.stlouisfed.org/series/U6RATE,Monthly,5,2,0,Yes,Citrini if rising faster than U-3.
+M15,Labor/income stress,JOLTS job openings,FRED,JTSJOL,thousands,level,https://fred.stlouisfed.org/series/JTSJOL,Monthly,5,2,0,Yes,Citrini if openings fall materially.
+M16,Labor/income stress,JOLTS hires rate,FRED,JTSHIR,%,level,https://fred.stlouisfed.org/series/JTSHIR,Monthly,5,2,0,Yes,Citrini if hires rate falls.
+M17,Labor/income stress,JOLTS quits rate,FRED,JTSQUR,%,level,https://fred.stlouisfed.org/series/JTSQUR,Monthly,4,1,0,Yes,"Citrini if quits fall, showing weak worker confidence."
+M18,Labor/income stress,Initial jobless claims,FRED,ICSA,claims,level,https://fred.stlouisfed.org/series/ICSA,Weekly,5,2,0,Yes,Citrini if rising trend.
+M19,White-collar stress,Professional/business services employment,FRED,USPBS,thousands,level,https://fred.stlouisfed.org/series/USPBS,Monthly,5,2,0,Yes,Citrini if white-collar employment rolls over.
+M20,White-collar stress,Information-sector employment,FRED,USINFO,thousands,level,https://fred.stlouisfed.org/series/USINFO,Monthly,5,2,0,Yes,Citrini if information employment weakens.
+M21,Labor/income stress,Real disposable personal income per capita,FRED,A229RX0,2017 USD,level,https://fred.stlouisfed.org/series/A229RX0,Monthly,5,2,2,Yes,Citrini if income falls; Alden if receipts/fiscal stress follow.
+M22,Credit stress,High-yield option-adjusted spread,FRED,BAMLH0A0HYM2,%,level,https://fred.stlouisfed.org/series/BAMLH0A0HYM2,Daily,5,3,1,Yes,Citrini if credit spreads widen sharply.
+M23,Credit stress,Senior loan officer tightening standards,FRED,DRTSCILM,% net tightening,level,https://fred.stlouisfed.org/series/DRTSCILM,Quarterly,4,3,0,Yes,Citrini/Green if credit tightens.
+M24,Credit stress,Commercial bank credit,FRED,TOTBKCR,$ billions,level,https://fred.stlouisfed.org/series/TOTBKCR,Weekly,4,2,1,Yes,Citrini if bank credit contracts.
+M25,Bank plumbing,FDIC unrealized securities losses,MANUAL,,$ billions,manual,https://www.fdic.gov/analysis/quarterly-banking-profile,Quarterly,2,4,3,Manual,Green if trapped securities impair lending; Alden if rescue/monetization follows.
+M26,Fiscal/reserve,Central-bank gold purchases,MANUAL,,tonnes,manual,https://www.gold.org/goldhub/research/gold-demand-trends,Quarterly,1,0,5,Manual,Alden if sustained/accelerating.
+M27,Fiscal/reserve,Foreign Treasury holdings,MANUAL,,$ billions,manual,https://home.treasury.gov/data/treasury-international-capital-tic-system,Monthly,1,0,5,Manual,Alden if weakening while gold purchases rise.
+M28,Fiscal/reserve,Federal deficit trailing 12 months,MANUAL,,$ billions,manual,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,Monthly,3,0,5,Manual,Alden if rising; Citrini if tax-base shock begins.
+M29,Fiscal/reserve,Net interest outlays,MANUAL,,$ billions,manual,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,Monthly,2,0,5,Manual,Alden if rising as share of receipts.
+M30,Fiscal/reserve,Individual income/payroll tax receipts,MANUAL,,$ billions,manual,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,Monthly,5,0,5,Manual,Citrini if receipts fall with labor income; Alden if deficits expand.
