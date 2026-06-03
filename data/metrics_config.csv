@@ -4,9 +4,9 @@ M02,Market pricing,30Y TIPS real yield,FRED,DFII30,%,level,https://fred.stlouisf
 M03,Inflation expectations,10Y breakeven inflation,FRED,T10YIE,%,level,https://fred.stlouisfed.org/series/T10YIE,Daily,1,4,4,Yes,Green if contained; Alden if rising meaningfully.
 M04,Inflation expectations,30Y breakeven inflation,DERIVED,DGS30-DFII30,%,derived,https://fred.stlouisfed.org/series/DGS30,Daily,1,3,4,Yes,Green if contained; Alden if rising.
 M05,Market pricing,10Y term premium,FRED,THREEFYTP10,%,level,https://fred.stlouisfed.org/series/THREEFYTP10,Daily/weekly,0,4,5,Yes,Green if compressing; Alden if rising.
-M06,Market pricing,TLT price,STOOQ,tlt.us,USD,price,https://YAHOO.com/q/d/l/?s=tlt.us&i=d,Daily,2,4,0,Yes,Green/Citrini if long bonds rally.
-M07,Market pricing,Gold proxy price GLD,STOOQ,gld.us,USD,price,https://YAHOO.com/q/d/l/?s=gld.us&i=d,Daily,2,0,5,Yes,"Alden if gold rises, especially despite high real yields/dollar."
-M08,Market pricing,Dollar index proxy UUP,STOOQ,uup.us,USD,price,https://YAHOO.com/q/d/l/?s=uup.us&i=d,Daily,0,0,3,Yes,Alden if gold rises despite dollar strength; otherwise helps classify other regimes.
+M06,Market pricing,TLT price,YAHOO,tlt.us,USD,price,https://YAHOO.com/q/d/l/?s=tlt.us&i=d,Daily,2,4,0,Yes,Green/Citrini if long bonds rally.
+M07,Market pricing,Gold proxy price GLD,YAHOO,gld.us,USD,price,https://YAHOO.com/q/d/l/?s=gld.us&i=d,Daily,2,0,5,Yes,"Alden if gold rises, especially despite high real yields/dollar."
+M08,Market pricing,Dollar index proxy UUP,YAHOO,uup.us,USD,price,https://YAHOO.com/q/d/l/?s=uup.us&i=d,Daily,0,0,3,Yes,Alden if gold rises despite dollar strength; otherwise helps classify other regimes.
 M09,Treasury demand,30Y auction tail,MANUAL,,bps,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,4,5,Manual,Green if stop-through/strong demand; Alden if repeated tails.
 M10,Treasury demand,30Y bid-to-cover,MANUAL,,ratio,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,4,5,Manual,Green if high bid-to-cover; Alden if weak.
 M11,Treasury demand,30Y indirect bidder share,MANUAL,,%,manual,https://www.treasurydirect.gov/auctions/announcements-data-results/,Auction/monthly,0,4,4,Manual,Green if indirect demand strong; Alden if falling.
