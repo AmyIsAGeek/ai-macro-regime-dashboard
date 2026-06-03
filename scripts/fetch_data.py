@@ -9,35 +9,59 @@ import pandas as pd
 import requests
 
 
-def get_with_retries(url: str, attempts: int = 1, sleep_seconds: int = 1) -> str:
-    """Fetch URL text with one fast attempt.
+def get_with_retries(
+    url: str,
+    attempts: int = 1,
+    sleep_seconds: int = 1,
+    timeout_seconds: int = 12,
+) -> str:
+    """Fetch URL text with a short timeout.
 
-    This version is intentionally aggressive: it fails quickly so GitHub Actions
-    does not hang if a public data source is slow or unreachable.
+    This fails fast enough for GitHub Actions but gives FRED enough time
+    to respond to small date-window requests.
     """
     headers = {
         "User-Agent": "Mozilla/5.0 ai-macro-regime-dashboard/1.0"
     }
 
-    try:
-        r = requests.get(url, timeout=5, headers=headers)
-        r.raise_for_status()
-        return r.text
-    except Exception as e:
-        raise RuntimeError(f"Fast fetch failed for {url}: {e}")
+    last_error = None
+
+    for attempt in range(1, attempts + 1):
+        try:
+            r = requests.get(url, timeout=timeout_seconds, headers=headers)
+            r.raise_for_status()
+            return r.text
+        except Exception as e:
+            last_error = e
+            if attempt < attempts:
+                time.sleep(sleep_seconds)
+
+    raise RuntimeError(f"Fetch failed for {url}: {last_error}")
 
 
-def fetch_fred_series(series_id: str) -> pd.DataFrame:
+def _window_start(target_date: str, days_back: int = 150) -> str:
+    """Return a YYYY-MM-DD date before target_date."""
+    target = pd.to_datetime(target_date)
+    start = target - pd.Timedelta(days=days_back)
+    return start.strftime("%Y-%m-%d")
+
+
+def fetch_fred_series(series_id: str, target_date: str | None = None) -> pd.DataFrame:
     """Fetch a public FRED CSV series without an API key.
 
-    Uses a recent observation window to avoid large downloads.
+    Uses a short recent observation window to avoid timeouts.
     """
+    if target_date:
+        cosd = _window_start(target_date, days_back=150)
+    else:
+        cosd = "2026-01-01"
+
     url = (
         f"https://fred.stlouisfed.org/graph/fredgraph.csv"
-        f"?id={series_id}&cosd=2025-01-01"
+        f"?id={series_id}&cosd={cosd}"
     )
 
-    text = get_with_retries(url)
+    text = get_with_retries(url, attempts=1, timeout_seconds=12)
 
     df = pd.read_csv(StringIO(text))
     df.columns = ["Date", "Value"]
@@ -49,7 +73,7 @@ def fetch_fred_series(series_id: str) -> pd.DataFrame:
 def fetch_stooq_daily(symbol: str) -> pd.DataFrame:
     """Legacy fallback. Prefer YAHOO for ETF proxies."""
     url = f"https://stooq.com/q/d/l/?s={symbol}&i=d&d1=20250101"
-    text = get_with_retries(url)
+    text = get_with_retries(url, attempts=1, timeout_seconds=8)
 
     if not text.lstrip().startswith("Date,"):
         raise ValueError(f"Stooq returned non-CSV content for {symbol}: {text[:200]}")
@@ -89,7 +113,7 @@ def fetch_yahoo_chart(
     }
 
     try:
-        r = requests.get(url, timeout=5, headers=headers)
+        r = requests.get(url, timeout=8, headers=headers)
         r.raise_for_status()
         payload = r.json()
 
