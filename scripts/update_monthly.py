@@ -23,6 +23,22 @@ OBS = DATA / "monthly_observations.csv"
 SCORES = DATA / "scenario_scores.csv"
 
 
+def mark_fetch_failed(obs: pd.DataFrame, mask, message: str) -> None:
+    """Clear stale values and mark a metric as failed for the current run."""
+    obs.loc[mask, "Value"] = ""
+    obs.loc[mask, "PriorValue"] = ""
+    obs.loc[mask, "MonthlyChange"] = ""
+    obs.loc[mask, "CitriniScore"] = 0
+    obs.loc[mask, "GreenScore"] = 0
+    obs.loc[mask, "AldenScore"] = 0
+    obs.loc[mask, "OtherScore"] = 0
+    obs.loc[mask, "Tilt"] = "Neutral"
+    obs.loc[mask, "Strength"] = 0
+    obs.loc[mask, "WeightUsed"] = ""
+    obs.loc[mask, "Notes"] = message
+    obs.loc[mask, "LastUpdated"] = date.today().strftime("%Y-%m-%d")
+
+
 def update_for_month(target_date: str) -> None:
     config = pd.read_csv(CONFIG)
     obs = pd.read_csv(OBS)
@@ -90,8 +106,11 @@ def update_for_month(target_date: str) -> None:
                 obs_date, value = latest_on_or_before(series, target_date)
                 prior_date, prior = prior_month_value(series, target_date)
             except Exception as e:
-                obs.loc[mask, "Notes"] = f"Auto-update failed for FRED {source_id}: {e}"
-                obs.loc[mask, "LastUpdated"] = date.today().strftime("%Y-%m-%d")
+                mark_fetch_failed(
+                    obs,
+                    mask,
+                    f"Auto-update failed for FRED {source_id}: {e}",
+                )
                 continue
 
         elif source_type == "YAHOO":
@@ -104,8 +123,11 @@ def update_for_month(target_date: str) -> None:
                 obs_date, value = latest_on_or_before(series, target_date)
                 prior_date, prior = prior_month_value(series, target_date)
             except Exception as e:
-                obs.loc[mask, "Notes"] = f"Auto-update failed for Yahoo {source_id}: {e}"
-                obs.loc[mask, "LastUpdated"] = date.today().strftime("%Y-%m-%d")
+                mark_fetch_failed(
+                    obs,
+                    mask,
+                    f"Auto-update failed for Yahoo {source_id}: {e}",
+                )
                 continue
 
         elif source_type == "STOOQ":
@@ -114,8 +136,11 @@ def update_for_month(target_date: str) -> None:
                 obs_date, value = latest_on_or_before(series, target_date)
                 prior_date, prior = prior_month_value(series, target_date)
             except Exception as e:
-                obs.loc[mask, "Notes"] = f"Auto-update failed for Stooq {source_id}: {e}"
-                obs.loc[mask, "LastUpdated"] = date.today().strftime("%Y-%m-%d")
+                mark_fetch_failed(
+                    obs,
+                    mask,
+                    f"Auto-update failed for Stooq {source_id}: {e}",
+                )
                 continue
 
         elif source_type == "DERIVED" and source_id == "DGS30-DFII30":
@@ -134,17 +159,19 @@ def update_for_month(target_date: str) -> None:
                 prior = None if pn_value is None or pr_value is None else pn_value - pr_value
 
             except Exception as e:
-                obs.loc[mask, "Notes"] = (
-                    f"Auto-update failed for derived DGS30-DFII30: {e}"
+                mark_fetch_failed(
+                    obs,
+                    mask,
+                    f"Auto-update failed for derived DGS30-DFII30: {e}",
                 )
-                obs.loc[mask, "LastUpdated"] = date.today().strftime("%Y-%m-%d")
                 continue
 
         else:
-            obs.loc[mask, "Notes"] = (
-                f"No updater available for SourceType={source_type}, SourceID={source_id}."
+            mark_fetch_failed(
+                obs,
+                mask,
+                f"No updater available for SourceType={source_type}, SourceID={source_id}.",
             )
-            obs.loc[mask, "LastUpdated"] = date.today().strftime("%Y-%m-%d")
             continue
 
         # Classify and score.
