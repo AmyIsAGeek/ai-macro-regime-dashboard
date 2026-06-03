@@ -3,25 +3,51 @@ name: Monthly data update
 on:
   schedule:
     # Runs at 7:00 AM Pacific on the 3rd day of each month.
+    # GitHub cron uses UTC, so 15:00 UTC is roughly 7:00 AM Pacific Standard Time.
     - cron: "0 15 3 * *"
+
   workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Target date for update, YYYY-MM-DD. Leave blank to use today's date."
+        required: false
+        default: ""
 
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run monthly updater
+
+      - name: Run monthly updater with selected date
+        if: ${{ github.event.inputs.target_date != '' }}
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: python scripts/update_monthly.py --date "${{ github.event.inputs.target_date }}"
+
+      - name: Run monthly updater with today's date
+        if: ${{ github.event.inputs.target_date == '' }}
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python scripts/update_monthly.py
+
       - name: Commit updated data
         run: |
           git config user.name "monthly-dashboard-bot"
