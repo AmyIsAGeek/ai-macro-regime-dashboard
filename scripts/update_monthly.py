@@ -62,6 +62,12 @@ def update_for_month(target_date: str) -> None:
 
     # Update automatable metrics.
     for _, metric in config.iterrows():
+        print(
+            f"Updating {metric['MetricID']} - {metric['Metric']} "
+            f"from {metric['SourceType']} {metric.get('SourceID', '')}",
+            flush=True,
+        )
+
         metric_id = str(metric["MetricID"])
         source_type = str(metric["SourceType"]).upper()
         source_id = str(metric.get("SourceID", "") or "")
@@ -80,7 +86,7 @@ def update_for_month(target_date: str) -> None:
 
         if source_type == "FRED":
             try:
-                series = fetch_fred_series(source_id)
+                series = fetch_fred_series(source_id, target_date=target_date)
                 obs_date, value = latest_on_or_before(series, target_date)
                 prior_date, prior = prior_month_value(series, target_date)
             except Exception as e:
@@ -114,8 +120,8 @@ def update_for_month(target_date: str) -> None:
 
         elif source_type == "DERIVED" and source_id == "DGS30-DFII30":
             try:
-                nominal = fetch_fred_series("DGS30")
-                real = fetch_fred_series("DFII30")
+                nominal = fetch_fred_series("DGS30", target_date=target_date)
+                real = fetch_fred_series("DFII30", target_date=target_date)
 
                 n_date, n_value = latest_on_or_before(nominal, target_date)
                 r_date, r_value = latest_on_or_before(real, target_date)
