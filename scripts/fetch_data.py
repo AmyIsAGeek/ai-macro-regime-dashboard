@@ -1,34 +1,51 @@
 from __future__ import annotations
 
-from io import StringIO
 from typing import Optional, Tuple
 from datetime import datetime, timezone
+import os
 import time
 
 import pandas as pd
 import requests
 
 
-def get_with_retries(
+def _headers() -> dict:
+    return {"User-Agent": "Mozilla/5.0 ai-macro-regime-dashboard/1.0"}
+
+
+def get_json_with_retries(
     url: str,
-    attempts: int = 1,
-    sleep_seconds: int = 1,
-    timeout_seconds: int = 12,
-) -> str:
-    """Fetch URL text with a short timeout.
-
-    This fails fast enough for GitHub Actions but gives FRED enough time
-    to respond to small date-window requests.
-    """
-    headers = {
-        "User-Agent": "Mozilla/5.0 ai-macro-regime-dashboard/1.0"
-    }
-
+    params: dict,
+    attempts: int = 2,
+    sleep_seconds: int = 2,
+    timeout_seconds: int = 20,
+) -> dict:
     last_error = None
 
     for attempt in range(1, attempts + 1):
         try:
-            r = requests.get(url, timeout=timeout_seconds, headers=headers)
+            r = requests.get(url, params=params, timeout=timeout_seconds, headers=_headers())
+            r.raise_for_status()
+            return r.json()
+        except Exception as e:
+            last_error = e
+            if attempt < attempts:
+                time.sleep(sleep_seconds)
+
+    raise RuntimeError(f"JSON fetch failed for {url}: {last_error}")
+
+
+def get_text_with_retries(
+    url: str,
+    attempts: int = 1,
+    sleep_seconds: int = 1,
+    timeout_seconds: int = 8,
+) -> str:
+    last_error = None
+
+    for attempt in range(1, attempts + 1):
+        try:
+            r = requests.get(url, timeout=timeout_seconds, headers=_headers())
             r.raise_for_status()
             return r.text
         except Exception as e:
@@ -36,55 +53,51 @@ def get_with_retries(
             if attempt < attempts:
                 time.sleep(sleep_seconds)
 
-    raise RuntimeError(f"Fetch failed for {url}: {last_error}")
+    raise RuntimeError(f"Text fetch failed for {url}: {last_error}")
 
 
-def _window_start(target_date: str, days_back: int = 150) -> str:
-    """Return a YYYY-MM-DD date before target_date."""
+def _window_start(target_date: str, days_back: int = 180) -> str:
     target = pd.to_datetime(target_date)
     start = target - pd.Timedelta(days=days_back)
     return start.strftime("%Y-%m-%d")
 
 
 def fetch_fred_series(series_id: str, target_date: str | None = None) -> pd.DataFrame:
-    """Fetch a public FRED CSV series without an API key.
+    """Fetch a FRED series through the official FRED API.
 
-    Uses a short recent observation window to avoid timeouts.
+    Requires FRED_API_KEY to be set as an environment variable.
     """
+    api_key = os.environ.get("FRED_API_KEY")
+    if not api_key:
+        raise RuntimeError(
+            "FRED_API_KEY is missing. Add it as a GitHub Actions repository secret."
+        )
+
     if target_date:
-        cosd = _window_start(target_date, days_back=150)
+        observation_start = _window_start(target_date, days_back=180)
+        observation_end = target_date
     else:
-        cosd = "2026-01-01"
+        observation_start = "2025-01-01"
+        observation_end = datetime.now().strftime("%Y-%m-%d")
 
-    url = (
-        f"https://fred.stlouisfed.org/graph/fredgraph.csv"
-        f"?id={series_id}&cosd={cosd}"
-    )
+    url = "https://api.stlouisfed.org/fred/series/observations"
+    params = {
+        "series_id": series_id,
+        "api_key": api_key,
+        "file_type": "json",
+        "observation_start": observation_start,
+        "observation_end": observation_end,
+    }
 
-    text = get_with_retries(url, attempts=1, timeout_seconds=12)
+    payload = get_json_with_retries(url, params=params)
 
-    df = pd.read_csv(StringIO(text))
-    df.columns = ["Date", "Value"]
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-    df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
-    return df.dropna().sort_values("Date")
+    observations = payload.get("observations", [])
+    if not observations:
+        raise ValueError(f"No FRED observations returned for {series_id}: {payload}")
 
-
-def fetch_stooq_daily(symbol: str) -> pd.DataFrame:
-    """Legacy fallback. Prefer YAHOO for ETF proxies."""
-    url = f"https://stooq.com/q/d/l/?s={symbol}&i=d&d1=20250101"
-    text = get_with_retries(url, attempts=1, timeout_seconds=8)
-
-    if not text.lstrip().startswith("Date,"):
-        raise ValueError(f"Stooq returned non-CSV content for {symbol}: {text[:200]}")
-
-    df = pd.read_csv(StringIO(text))
-
-    if df.empty or "Date" not in df.columns:
-        raise ValueError(f"No Stooq data returned for {symbol}")
-
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
-    df["Value"] = pd.to_numeric(df["Close"], errors="coerce")
+    df = pd.DataFrame(observations)
+    df["Date"] = pd.to_datetime(df["date"], errors="coerce")
+    df["Value"] = pd.to_numeric(df["value"], errors="coerce")
     return df[["Date", "Value"]].dropna().sort_values("Date")
 
 
@@ -108,46 +121,57 @@ def fetch_yahoo_chart(
         f"&events=history&includeAdjustedClose=true"
     )
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 ai-macro-regime-dashboard/1.0"
-    }
+    r = requests.get(url, timeout=10, headers=_headers())
+    r.raise_for_status()
+    payload = r.json()
 
-    try:
-        r = requests.get(url, timeout=8, headers=headers)
-        r.raise_for_status()
-        payload = r.json()
+    result = payload.get("chart", {}).get("result", [])
+    if not result:
+        raise ValueError(f"No Yahoo chart result for {symbol}: {payload}")
 
-        result = payload.get("chart", {}).get("result", [])
-        if not result:
-            raise ValueError(f"No Yahoo chart result for {symbol}: {payload}")
+    result = result[0]
+    timestamps = result.get("timestamp", [])
+    adjclose = (
+        result.get("indicators", {})
+        .get("adjclose", [{}])[0]
+        .get("adjclose", [])
+    )
 
-        result = result[0]
-        timestamps = result.get("timestamp", [])
-        adjclose = (
-            result.get("indicators", {})
-            .get("adjclose", [{}])[0]
-            .get("adjclose", [])
-        )
+    if not timestamps or not adjclose:
+        raise ValueError(f"Missing timestamp/adjclose data for {symbol}")
 
-        if not timestamps or not adjclose:
-            raise ValueError(f"Missing timestamp/adjclose data for {symbol}")
+    df = pd.DataFrame(
+        {
+            "Date": pd.to_datetime(
+                timestamps,
+                unit="s",
+                utc=True,
+            ).tz_convert(None).normalize(),
+            "Value": adjclose,
+        }
+    )
 
-        df = pd.DataFrame(
-            {
-                "Date": pd.to_datetime(
-                    timestamps,
-                    unit="s",
-                    utc=True,
-                ).tz_convert(None).normalize(),
-                "Value": adjclose,
-            }
-        )
+    df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
+    return df.dropna().sort_values("Date")
 
-        df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
-        return df.dropna().sort_values("Date")
 
-    except Exception as e:
-        raise RuntimeError(f"Fast Yahoo chart fetch failed for {symbol}: {e}")
+def fetch_stooq_daily(symbol: str) -> pd.DataFrame:
+    """Legacy fallback retained for compatibility."""
+    from io import StringIO
+
+    url = f"https://stooq.com/q/d/l/?s={symbol}&i=d&d1=20250101"
+    text = get_text_with_retries(url)
+
+    if not text.lstrip().startswith("Date,"):
+        raise ValueError(f"Stooq returned non-CSV content for {symbol}: {text[:200]}")
+
+    df = pd.read_csv(StringIO(text))
+    if df.empty or "Date" not in df.columns:
+        raise ValueError(f"No Stooq data returned for {symbol}")
+
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df["Value"] = pd.to_numeric(df["Close"], errors="coerce")
+    return df[["Date", "Value"]].dropna().sort_values("Date")
 
 
 def latest_on_or_before(
