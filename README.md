@@ -42,6 +42,10 @@ python scripts/update_monthly.py --date 2026-05-31
 streamlit run app.py
 ```
 
+## Manual data entry
+
+For instructions on updating metrics that are not automatically populated, see MANUAL_DATA_ENTRY.md.
+
 ## Notes
 
 The first version automates the easiest public data sources, mostly FRED and Stooq. Some metrics remain manual because the cleanest public data are quarterly, semi-structured, or not available without paid sources.
