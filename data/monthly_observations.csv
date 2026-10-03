@@ -149,3 +149,33 @@ Date,MetricID,Value,PriorValue,MonthlyChange,Unit,CitriniScore,GreenScore,AldenS
 2026-09-03,M28,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,2026-09-03,Yes
 2026-09-03,M29,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,2026-09-03,Yes
 2026-09-03,M30,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,2026-09-03,Yes
+2026-10-03,M01,5.61,5.25,0.36,%,0,0,0,0,Neutral,1,3.0,Auto observation date 2026-10-01. 30Y yield is informative but not decisive this month.,https://fred.stlouisfed.org/series/DGS30,2026-10-03,No
+2026-10-03,M02,3.31,2.96,0.35,%,0,15,0,0,Green,3,5.0,Auto observation date 2026-10-01. Very high 30Y real yield supports Green's long-TIPS valuation case.,https://fred.stlouisfed.org/series/DFII30,2026-10-03,No
+2026-10-03,M03,2.36,2.35,0.01,%,0,4,0,0,Green,1,4.0,Auto observation date 2026-10-02. Breakevens remain broadly contained.,https://fred.stlouisfed.org/series/T10YIE,2026-10-03,No
+2026-10-03,M04,2.3,2.29,0.01,%,0,3,0,0,Green,1,4.0,Auto observation date 2026-10-01. Breakevens remain broadly contained.,https://fred.stlouisfed.org/series/DGS30,2026-10-03,No
+2026-10-03,M05,1.0203,0.8812,0.1391,%,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-09-25. Term-premium move is not decisive.,https://fred.stlouisfed.org/series/THREEFYTP10,2026-10-03,No
+2026-10-03,M06,77.48,81.7408,-4.2608,USD,0,0,0,8,Other,2,4.0,Auto observation date 2026-10-02. Long bonds fell; likely higher real-rate/liquidity/fiscal pressure. Check gold to distinguish Alden.,https://finance.yahoo.com/quote/TLT,2026-10-03,No
+2026-10-03,M07,380.14,410.22,-30.08,USD,0,0,0,0,Green,1,5.0,Auto observation date 2026-10-02. Gold weakness may support Green if real yields remain high.,https://finance.yahoo.com/quote/GLD,2026-10-03,No
+2026-10-03,M08,28.89,28.01,0.88,USD,0,0,0,0,Neutral,1,3.0,Auto observation date 2026-10-02. Dollar proxy is a context metric; interpret with gold.,https://finance.yahoo.com/quote/UUP,2026-10-03,No
+2026-10-03,M09,,,,bps,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://www.treasurydirect.gov/auctions/announcements-data-results/,2026-10-03,Yes
+2026-10-03,M10,,,,ratio,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://www.treasurydirect.gov/auctions/announcements-data-results/,2026-10-03,Yes
+2026-10-03,M11,,,,%,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://www.treasurydirect.gov/auctions/announcements-data-results/,2026-10-03,Yes
+2026-10-03,M12,,,,%,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://www.treasurydirect.gov/auctions/announcements-data-results/,2026-10-03,Yes
+2026-10-03,M13,4.2,4.2,0.0,%,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-09-01. No decisive labor deterioration.,https://fred.stlouisfed.org/series/UNRATE,2026-10-03,No
+2026-10-03,M14,7.6,7.6,0.0,%,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-09-01. No decisive labor deterioration.,https://fred.stlouisfed.org/series/U6RATE,2026-10-03,No
+2026-10-03,M15,7079.0,7079.0,0.0,thousands,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-08-01. No decisive labor/income deterioration.,https://fred.stlouisfed.org/series/JTSJOL,2026-10-03,No
+2026-10-03,M16,3.3,3.3,0.0,%,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-08-01. No decisive labor/income deterioration.,https://fred.stlouisfed.org/series/JTSHIR,2026-10-03,No
+2026-10-03,M17,1.9,1.9,0.0,%,0,0,0,0,Neutral,1,4.0,Auto observation date 2026-08-01. No decisive labor/income deterioration.,https://fred.stlouisfed.org/series/JTSQUR,2026-10-03,No
+2026-10-03,M18,197000.0,207000.0,-10000.0,claims,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-09-26. Claims are not sending a strong Citrini signal.,https://fred.stlouisfed.org/series/ICSA,2026-10-03,No
+2026-10-03,M19,22482.0,22482.0,0.0,thousands,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-09-01. No decisive labor/income deterioration.,https://fred.stlouisfed.org/series/USPBS,2026-10-03,No
+2026-10-03,M20,2739.0,2739.0,0.0,thousands,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-09-01. No decisive labor/income deterioration.,https://fred.stlouisfed.org/series/USINFO,2026-10-03,No
+2026-10-03,M21,53674.0,53674.0,0.0,2017 USD,0,0,0,0,Neutral,1,5.0,Auto observation date 2026-08-01. No decisive labor/income deterioration.,https://fred.stlouisfed.org/series/A229RX0,2026-10-03,No
+2026-10-03,M22,3.24,2.65,0.59,%,0,0,0,8,Other,2,5.0,Auto observation date 2026-10-01. Tight credit spreads argue against active Citrini crisis.,https://fred.stlouisfed.org/series/BAMLH0A0HYM2,2026-10-03,No
+2026-10-03,M23,0.0,0.0,0.0,% net tightening,0,0,0,0,Neutral,1,4.0,Auto observation date 2026-07-01. Loan standards are not decisively tight.,https://fred.stlouisfed.org/series/DRTSCILM,2026-10-03,No
+2026-10-03,M24,19862.5105,19846.8319,15.6786,$ billions,0,0,0,0,Neutral,1,4.0,Auto observation date 2026-09-23. Bank credit did not contract materially.,https://fred.stlouisfed.org/series/TOTBKCR,2026-10-03,No
+2026-10-03,M25,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://www.fdic.gov/analysis/quarterly-banking-profile,2026-10-03,Yes
+2026-10-03,M26,,,,tonnes,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://www.gold.org/goldhub/research/gold-demand-trends,2026-10-03,Yes
+2026-10-03,M27,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://home.treasury.gov/data/treasury-international-capital-tic-system,2026-10-03,Yes
+2026-10-03,M28,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,2026-10-03,Yes
+2026-10-03,M29,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,2026-10-03,Yes
+2026-10-03,M30,,,,$ billions,0,0,0,0,Neutral,0,,Placeholder created by updater.,https://fiscaldata.treasury.gov/datasets/monthly-treasury-statement/,2026-10-03,Yes
